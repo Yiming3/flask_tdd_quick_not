@@ -28,7 +28,6 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 # init sqlalchemy
 db = SQLAlchemy(app)
-db.create_all()
 
 from project import models
 
