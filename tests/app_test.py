@@ -7,6 +7,7 @@ import json
 
 TEST_DB = "test.db"
 
+
 @pytest.fixture
 def client():
     BASE_DIR = Path(__file__).resolve().parent.parent
@@ -75,6 +76,7 @@ def test_messages(client):
     assert b"&lt;Hello&gt;" in rv.data
     assert b"<strong>HTML</strong> allowed here" in rv.data
 
+
 def test_delete_message(client):
     """Ensure the messages are being deleted"""
     rv = client.get("/delete/1")
@@ -85,19 +87,21 @@ def test_delete_message(client):
     data = json.loads(rv.data)
     assert data["status"] == 1
 
+
 def test_search_query(client):
     rv = client.post(
         "/add",
         data=dict(title="abcde", text="dcefg"),
         follow_redirects=True,
     )
-    response = client.get('/search/?query=abc')
+    response = client.get("/search/?query=abc")
     assert response.status_code == 200
+
 
 def test_delete_when_logged_out(client):
     with client.session_transaction() as sess:
-        sess['logged_in'] = False
-    response = client.get('/delete/1')
+        sess["logged_in"] = False
+    response = client.get("/delete/1")
     assert response.status_code == 401
     json_data = response.get_json()
-    assert json_data == {'status': 0, 'message': 'Please log in.'}
+    assert json_data == {"status": 0, "message": "Please log in."}
