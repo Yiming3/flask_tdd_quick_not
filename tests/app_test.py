@@ -89,6 +89,7 @@ def test_delete_message(client):
 
 
 def test_search_query(client):
+    login(client, app.config["USERNAME"], app.config["PASSWORD"])
     rv = client.post(
         "/add",
         data=dict(title="abcde", text="dcefg"),
@@ -96,12 +97,15 @@ def test_search_query(client):
     )
     response = client.get("/search/?query=abc")
     assert response.status_code == 200
+    assert b"dcefg" in response.data
 
 
 def test_delete_when_logged_out(client):
-    with client.session_transaction() as sess:
-        sess["logged_in"] = False
-    response = client.get("/delete/1")
-    assert response.status_code == 401
-    json_data = response.get_json()
-    assert json_data == {"status": 0, "message": "Please log in."}
+    client.get("/logout", follow_redirects=True)
+    rv = client.get("/delete/1")
+    data = json.loads(rv.data)
+    assert data["status"] == 0
+    login(client, app.config["USERNAME"], app.config["PASSWORD"])
+    rv = client.get("/delete/1")
+    data = json.loads(rv.data)
+    assert data["status"] == 1
